@@ -1,0 +1,83 @@
+---
+title: "Reproducible Report Template - Basic"
+author: "Student/s SID"
+subtitle: "Project X"
+date: "University of Sydney | Unit of Study | MONTH YEAR"
+# You can change the title, subtitle, author etc.
+# if you do not want a subtitle, author, or date just delete or comment # the the line!
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    self_contained: yes
+    theme: flatly
+    # Other themes can be found at: https://bootswatch.com/
+    css: 
+      - https://use.fontawesome.com/releases/v5.0.6/css/all.css
+    #This will allow you to insert icons in your document, thanks to [Font Awesome](http://fontawesome.io).
+    #You will find an examples below.
+    # If you are knitting your document but not connected to the internet, place a "#" in front of the css line above with the font-awesome.min.css line to comment it out. This will let you knit the document in draft form until you connect again and knit the final. Note that when you do this some elements will be missing from the knitted slides. 
+    toc: true
+    #This adds a Table of Contents (toc).
+    toc_depth: 3
+    #This controls the number of subheadings included in the toc.
+    toc_float: true
+    #This allows toc to update relative to your location as you scroll down the html page.
+    code_folding: hide
+    #code_folding can be changed to "hide"" if you want the all your code to be collapsed when you open the document
+    
+    # More information: http://rmarkdown.rstudio.com/html_document_format.html
+---
+
+<br>
+
+# Client Bio & Recommendation [150 words]
+
+- Identifies a real Client ('Client Bio') and gives a clear, concrete, relevant recommendation for that Client.
+
+- Note: In your Client Bio (ie description of who your Client is), it is normal practise to give a LinkedIn url, or a company website page that profiles your client.
+
+<br>
+
+
+# Evidence [400 words]
+
+## Initial Data Analysis (IDA)
+
+Summary:
+
+- The data came from ...
+- The data is/is not valid because ...
+- Possible issues include ...
+- Each row represents ...
+- Each column represents ...
+
+<br>
+
+## Your Next Title Here
+
+Insert text and analysis. 
+
+
+
+# Acknowledgments
+
+Style: APA 
+
+<br>
+
+
+# Appendix [200 words]
+
+## Client Choice
+How did you decide who your Client was, and how did that affect the content in your report?
+
+## Statisitcal Analyses
+
+Why did you choose what you did?
+
+If you did linear modelling or hypothesis testing, show your process of HATPC here, with care to assumptions and interpretation.
+
+If you did not use linear modelling or hypothesis testing, provide a convincing rationale as to why your chosen methods were the most appropriate. 
+
+## Limitations
