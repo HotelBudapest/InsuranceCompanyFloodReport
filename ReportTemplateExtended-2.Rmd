@@ -7,10 +7,11 @@ date: "University of Sydney | Unit of Study | MONTH YEAR"
 # if you do not want a subtitle, author, or date just delete or comment # the the line!
 output:
   html_document:
+    fontsize: 30pt
     fig_caption: yes
-    number_sections: yes
+    number_sections: no
     self_contained: yes
-    theme: flatly
+    theme: united
     # Other themes can be found at: https://bootswatch.com/
     css: 
       - https://use.fontawesome.com/releases/v5.0.6/css/all.css
@@ -29,57 +30,85 @@ output:
     # More information: http://rmarkdown.rstudio.com/html_document_format.html
 ---
 
+<style>
+  toc {
+  font-size: 10px;
+}
+  body {
+    font-size: 16px;
+  }
+  h1 {
+    font-size: 2em;
+  }
+  h2 {
+    font-size: 1.5em;
+  }
+</style>
+
 <br>
 
-# Client Bio & Recommendation [150 words]
+# Client Bio & Recommendation
 
-- Identifies a real Client ('Client Bio') and gives a clear, concrete, relevant recommendation for that Client.
+## Client Information
 
-- Note: In your Client Bio (ie description of who your Client is), it is normal practise to give a LinkedIn url, or a company website page that profiles your client.
+The client for this report is AllState Insurance company’s Senior Product Manager, Mr. Kunal Gupta 
+
+[Mr. Kunal Gupta on LinkedIN](https://www.linkedin.com/in/kunalgupta028/?originalSubdomain=in).
+
+## Company Information
+
+Allstate Corporation is an insurance company that owns and operates over 19 companies around the United States, United Kingdom, Canada, and India. Based in San Francisco, California: Esurance, Inc. In this report, recommendations regarding the interests of AllState’s expansion in the Indian Insurance market have been made.
+
+## Recommendations
+
+Upon examination of evidences collected, addressing an increasing demand in flood insurance has been pointed out as a strong means of standing out in the Indian Market. The recommended amendments to the policies regarding floods are:
+
+1. **Introduction of temporary housing cost coverage for people facing homelessness due to flood.** A pilot program of up to $20,000 for temporary accommodation and related expenses is suggested.
+
+2. **Expand personal property coverage to include up to $50,000 for flood-damaged contents,** covering items like furniture, electronics, and personal belongings without depreciation.
+
 
 <br>
 
 
-# Evidence [400 words]
+# Evidence
+
+
+## Initial Data Analysis (IDA)
+
+### Source and Validity
+
+The dataset for this report has been taken from [Our World in Data](https://ourworldindata.org/natural-disasters) Natural Disasters Dataset. This data is valid for this report as it covers various disaster types and their impacts, allowing comparisons across countries and evaluation of economic and devastation effects.
+
+### Assumptions
+
+- The dataset accurately represents actual conditions in the regions and periods covered.
+
+- Data from different countries and years are comparable, using similar definitions and measurement standards across observations.
+
+
+### Rows and Columns
+
+The dataset contained 171 variables. We evaluated `Year,` `Number of people affected by floods,` `Number of people left homeless from floods,` `Insured damages against drought,` `Insured damages against floods,` and `Insured damages against earthquakes` for four countries. Columns were the variables; each row represented data for a country.
+
+### Data Cleaning
+
+In the Flood Impact section, data is filtered for specific countries and relevant columns, then averaged for flood impact variables. In the Trends in Insured Damages section, India's insured damages for various disasters are filtered from 1980 onwards, excluding NA values. Data is reshaped and cleaned for plotting trends over time.
 
 ```{r}
 library(tidyverse)
 
-# Load your data from a CSV file
 data <- read_csv("natural-disasters.csv")
+```
 
+## Flood Impact
+
+First, we compare the effects of floods in the countries where AllState operates: United States, United Kingdom, India, and Canada.
+
+```{r}
 filterData <- data %>%
   filter(Entity %in% c("India", "United Kingdom", "United States", "Canada")) %>%
   select(Entity, Year, `Number of people affected by floods`, `Number of people left homeless from floods`)
-
-# Filter data for India
-india_data <- data %>% filter(Entity == "India")
-
-# Select relevant columns and reshape the data
-india_long <- india_data %>%
-  select(Year, `Insured damages against drought`, `Insured damages against floods`,
-         `Insured damages against earthquakes`) %>%
-  pivot_longer(cols = starts_with("Insured damages"),
-               names_to = "DisasterType",
-               values_to = "InsuredDamages") %>%
-  mutate(DisasterType = str_replace(DisasterType, "Insured damages against ", ""))
-
-# Filter data for India starting from the year 1980 and remove NA values
-india_long_filtered <- india_long %>%
-  filter(Year >= 1980 & !is.na(InsuredDamages))
-
-# Line plot to show trends over time
-ggplot(india_long_filtered, aes(x = Year, y = InsuredDamages, color = DisasterType, group = DisasterType)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Trends in Insured Damages in India for Various Disasters",
-       x = "Year",
-       y = "Insured Damages (in monetary units)",
-       color = "Disaster Type") +
-  theme_minimal() +
-  scale_y_continuous(labels = scales::comma)
-
-
 
 avgData <- filterData %>%
   group_by(Entity) %>%
@@ -94,51 +123,89 @@ ggplot(avgData, aes(x = Entity, y = Value, fill = Legends)) +
   scale_y_log10(labels = scales::comma_format()) +
   labs(x = "Country", 
        y = "Log(Average Number of People)", 
-       title = "Comparison of Flood Impact: Affected vs Homeless") +
+       title = "Comparison of Flood Impact: Affected vs Homeless"
+       ) +
+  
+  scale_fill_manual(
+    values = c("avgAffected" = "lightblue", "avgHomeless" = "darkgreen"),
+    labels = c("avgAffected" = "Average Affected", "avgHomeless" = "Average Homeless")
+  ) +
   theme_minimal()
 ```
+From the graph, it's clear that India suffers the most from floods and homelessness. India averages over 6 million people affected by floods and over 200,000 made homeless, significantly higher than Canada, the UK, and the USA, each with figures under 10,000.
 
+## Hypothesis Test
+
+Now we verify our finding by conducting the following Hypothesis Test:
+
+Null Hypothesis: There is no difference in Number of People Affected in India compared to the mean of US, UK and Canada.
+
+Alternative Hypothesis: There is significant difference in Number of People Affected in India compared to the mean of US, UK and Canada.
 
 ```{r}
-# Filter data for the selected countries
-countries <- c("India", "Canada", "United Kingdom", "United States")
-filtered_data <- data %>% filter(Entity %in% countries)
+filtered_data <- filterData %>% filter(Year > 1979) #filter to data greater than 1980 
+india_data <- filtered_data %>% filter(Entity == "India") %>% select(`Number of people affected by floods`)
+other_data <- filtered_data %>% filter(Entity != "India") %>% select(`Number of people affected by floods`)
 
-# Perform ANOVA for number of people affected by floods
-anova_affected <- aov(`Number of people affected by floods` ~ Entity, data = filtered_data)
-summary(anova_affected)
-
-# Perform ANOVA for number of people left homeless from floods
-anova_homeless <- aov(`Number of people left homeless from floods` ~ Entity, data = filtered_data)
-summary(anova_homeless)
-
-# Interpret the p-values
-p_value_affected <- summary(anova_affected)[[1]][["Pr(>F)"]][1]
-p_value_homeless <- summary(anova_homeless)[[1]][["Pr(>F)"]][1]
-
-cat("P-value for people affected by floods:", p_value_affected, "\n")
-cat("P-value for people left homeless from floods:", p_value_homeless, "\n")
-
+var.test(india_data$`Number of people affected by floods`, other_data$`Number of people affected by floods`)
 ```
 
+We see here that the variance of the 2 populations is not equal, which justifies us conducting the Welch test here 
 
-## Initial Data Analysis (IDA)
+```{r}
+result <- t.test(india_data, other_data)
+result
+```
+```{r}
+print(paste("P-value:", result$p.value))
+```
 
-Summary:
+The p-value (< 0.05) indicates a statistically significant difference, leading us to reject the null hypothesis and conclude that the number of people affected by floods in India is significantly higher than in other countries.
 
-- The data came from ...
-- The data is/is not valid because ...
-- Possible issues include ...
-- Each row represents ...
-- Each column represents ...
+## Trends in Insured Damages
+
+```{r}
+# Filter data for India
+india_data <- data %>% filter(Entity == "India")
+
+india_long <- india_data %>%
+  select(Year, `Insured damages against drought`, `Insured damages against floods`,
+         `Insured damages against earthquakes`) %>%
+  pivot_longer(cols = starts_with("Insured damages"),
+               names_to = "DisasterType",
+               values_to = "InsuredDamages") %>%
+  mutate(DisasterType = str_to_title(str_replace(DisasterType, "Insured damages against ", "")))
+
+
+# Filter data for India starting from the year 1980 and remove NA values
+india_long_filtered <- india_long %>%
+  filter(Year >= 1980 & !is.na(InsuredDamages))
+
+# Line plot to show trends over time
+ggplot(india_long_filtered, aes(x = Year, y = InsuredDamages, color = DisasterType, group = DisasterType)) +
+  geom_line() +
+  geom_point(size = 1.5) +
+  labs(title = "Trends in Insured Damages in India for Various Disasters",
+       x = "Year",
+       y = "Insured Damages (in monetary units)",
+       color = "Disaster Type") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)
+```
+
+In India, insured damages from floods have significantly surpassed those from droughts and earthquakes, with flood damages exceeding 150,000 monetary units, while drought and earthquake damages remain below 50,000 monetary units.
+
+## Further Evidence
+
+We exhibit further validation for the recommendations in the following media articles:
+
+[Banking Frontiers Article on Flood Insurance in India](https://bankingfrontiers.com/flood-insurance-yet-to-gain-popularity-in-india/)
+
+[LinkedIn Pulse Article on Flood Insurance Market](https://www.linkedin.com/pulse/latest-size-flood-insurance-market-dajlf/)
+
+These analyses underscore a lack of dedicated flood-damage policies in India. Aligning with global practices like Germany's comprehensive coverage and addressing the limitations seen in the U.S., adding temporary housing costs and expedited claims processing to AllState's policies will address uninsured risks and offer crucial support during flood crises.
 
 <br>
-
-## Your Next Title Here
-
-Insert text and analysis. 
-
-
 
 # Acknowledgments
 
@@ -147,7 +214,7 @@ Style: APA
 <br>
 
 
-# Appendix [200 words]
+# Appendix
 
 ## Client Choice
 How did you decide who your Client was, and how did that affect the content in your report?
@@ -160,4 +227,10 @@ If you did linear modelling or hypothesis testing, show your process of HATPC he
 
 If you did not use linear modelling or hypothesis testing, provide a convincing rationale as to why your chosen methods were the most appropriate. 
 
-## Limitations
+
+## Possible Limitations
+
+- The recordings of certain values for some countries are not present due to the countries not having proper infrastructure to record them.
+- The accuracy of the data collected, particularly in disaster-stricken areas, can be compromised due to chaotic conditions or lack of proper reporting mechanisms.
+- The dataset might not include all relevant variables that influence homelessness and insurance claims, such as government aid, local infrastructure, and socioeconomic factors.
+- There may be a lag between the occurrence of a flood and the reporting of data, affecting the accuracy of time-sensitive analyses.
