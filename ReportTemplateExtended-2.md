@@ -88,7 +88,8 @@ The dataset contained 171 variables. We evaluated `Year,` `Number of people affe
 
 In the Flood Impact section, data is filtered for specific countries and relevant columns, then averaged for flood impact variables. In the Trends in Insured Damages section, India's insured damages for various disasters are filtered from 1980 onwards, excluding NA values. Data is reshaped and cleaned for plotting trends over time.
 
-```{r message = FALSE}
+
+```r
 library(tidyverse)
 
 data <- read_csv("natural-disasters.csv")
@@ -98,7 +99,8 @@ data <- read_csv("natural-disasters.csv")
 
 <span style="font-size:24px; background-color: lightgreen;">How do flood impacts differ in terms of affected and homeless populations among AllState's operating countries: USA, UK, India, and Canada?</span>
 
-```{r message = FALSE}
+
+```r
 filterData <- data %>%
   filter(Entity %in% c("India", "United Kingdom", "United States", "Canada")) %>%
   select(Entity, Year, `Number of people affected by floods`, `Number of people left homeless from floods`)
@@ -126,6 +128,8 @@ ggplot(avgData, aes(x = Entity, y = Value, fill = Legends)) +
   theme_minimal()
 ```
 
+![](ReportTemplateExtended-2_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
 From the graph, it's clear that <span style="background-color: lightgreen; font-size: 17px;">India suffers the most from floods and homelessness</span>. India averages over 6 million people affected by floods and over 200,000 made homeless, significantly higher than Canada, the UK, and the USA, each with figures under 10,000.
 
 ## Hypothesis Test
@@ -136,15 +140,35 @@ Now we verify our finding by conducting a Welch Test on the following Hypothesis
 
 - <span style="color: rgb(201, 79, 2)">**Alternative Hypothesis:**</span> There is significant difference in Number of People Affected in India compared to the mean of US, UK and Canada.
 
-```{r}
+
+```r
 filtered_data <- filterData %>% filter(Year > 1979) #filter to data greater than 1980 
 india_data <- filtered_data %>% filter(Entity == "India") %>% select(`Number of people affected by floods`)
 other_data <- filtered_data %>% filter(Entity != "India") %>% select(`Number of people affected by floods`)
 result <- t.test(india_data, other_data)
 result
 ```
-```{r}
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  india_data and other_data
+## t = 4.5501, df = 3.003, p-value = 0.01985
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##   5729998 32347225
+## sample estimates:
+##  mean of x  mean of y 
+## 19146882.8   108271.1
+```
+
+```r
 print(paste("P-value:", result$p.value))
+```
+
+```
+## [1] "P-value: 0.0198465172816344"
 ```
 
 The p-value (< 0.05) indicates a statistically significant difference, leading us to reject the null hypothesis and conclude that the number of people affected by floods in India is significantly higher than in other countries.
@@ -153,7 +177,8 @@ The p-value (< 0.05) indicates a statistically significant difference, leading u
 
 <span style="font-size:24px;background-color: lightgreen;">How do insured damages from different disaster types in India compare over time?</span>
 
-```{r}
+
+```r
 # Filter data for India
 indiaData <- data %>% filter(Entity == "India")
 
@@ -181,6 +206,8 @@ ggplot(india_long_filtered, aes(x = Year, y = InsuredDamages, color = DisasterTy
   theme_minimal() +
   scale_y_continuous(labels = scales::comma)
 ```
+
+![](ReportTemplateExtended-2_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 In India, insured damages from floods have significantly surpassed those from droughts and earthquakes, with flood damages exceeding 150,000 monetary units, while drought and earthquake damages remain below 50,000 monetary units.<span style="background-color: lightgreen; font-size: 17px;"> This rising trend in flood insurances indicates a growing market demand.</span>
 
@@ -230,18 +257,37 @@ Brainstorming potential clients for a disaster analysis report led me to conside
 
 We used hypothesis testing to determine if there was a significant difference in the average number of people affected by floods in India compared to the average number in the US, UK, and Canada. First, we conducted an F test to check if the variances of the two populations were equal.
 
-```{r}
+
+```r
 variance_india <- var(india_data$`Number of people affected by floods`, na.rm = TRUE)
 variance_others <- var(other_data$`Number of people affected by floods`, na.rm = TRUE)
 print(paste("Variance for India: ", variance_india))
-print(paste("Variance for other countries: ", variance_others))
+```
 
+```
+## [1] "Variance for India:  69996343455728.5"
+```
+
+```r
+print(paste("Variance for other countries: ", variance_others))
+```
+
+```
+## [1] "Variance for other countries:  104264864256.08"
+```
+
+```r
 print(paste("Ratio of Variances: ", variance_india/variance_others))
+```
+
+```
+## [1] "Ratio of Variances:  671.33203457508"
 ```
 
 Since the variances are unequal, we verify normality using a QQ plot and then perform the Welch Test for robust mean comparison.
 
-```{r}
+
+```r
 combined_data <- bind_rows(
   india_data %>% mutate(Entity = "India"),
   other_data %>% mutate(Entity = "Other Countries")
@@ -257,6 +303,8 @@ ggplot(combined_data, aes(sample = `Number of people affected by floods`, color 
        shape = "Country") +
   theme_minimal()
 ```
+
+![](ReportTemplateExtended-2_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 <br> 
 
@@ -278,14 +326,24 @@ ggplot(combined_data, aes(sample = `Number of people affected by floods`, color 
 
 <span style="color: rgb(201, 79, 2); font-size: 20px;">T:</span> **Test Statistic**
 
-```{r}
+
+```r
 print(paste("t-value:", result$statistic))
+```
+
+```
+## [1] "t-value: 4.55008807548006"
 ```
 
 <span style="color: rgb(201, 79, 2); font-size: 20px;">P:</span> **P-Value**
 
-```{r}
+
+```r
 print(paste("P-value:", result$p.value))
+```
+
+```
+## [1] "P-value: 0.0198465172816344"
 ```
 
 <span style="color: rgb(201, 79, 2); font-size: 20px;">C:</span> **Conclusion**
