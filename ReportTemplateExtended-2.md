@@ -1,5 +1,5 @@
 ---
-title: "Strategic Policy Recommendations for Expansion in India Market"
+title: "Strategic Policy Recommendations for Expansion in Indian Market"
 author: "Arian Islam"
 date: "University of Sydney | 1st Year | 2024/05/17"
 output:
