@@ -1,8 +1,7 @@
 ---
 title: "Strategic Policy Recommendations for Expansion in India Market"
-author: "SID : 530776293"
-subtitle: "Project 3"
-date: "University of Sydney | DATA1001 | 2024/05/17"
+author: "Arian Islam"
+date: "University of Sydney | 1st Year | 2024/05/17"
 output:
   html_document:
 
